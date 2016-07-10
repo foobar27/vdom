@@ -23,7 +23,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src/cljs"]
+                :source-paths ["src/cljs" "src/clj"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -44,7 +44,7 @@
                ;; production. You can build this with:
                ;; lein cljsbuild once min
                {:id "min"
-                :source-paths ["src/cljs"]
+                :source-paths ["src/cljs" "src/clj"]
                 :compiler {:output-to "resources/public/js/compiled/vdom.js"
                            :main vdom.core
                            :optimizations :advanced

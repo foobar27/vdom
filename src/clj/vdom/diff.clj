@@ -19,7 +19,6 @@
        ~@(for [payload payloads]
            ((:data payload) old new))))
 
-
 ;; (defmacro compile-diff [paths]
 ;;   "Compiles paths to code which executes actions on diffs"
 ;;   (if (seq paths)

@@ -1,5 +1,5 @@
 (ns vdom.core
-  (:require ))
+  (:require-macros [vdom.generate-html :refer [compile-set-attribute compile-set-text]]))
 
 (enable-console-print!)
 
@@ -19,12 +19,13 @@
       (let [old-id (get old-data :id)
             new-id (get new-data :id)]
         (when-not (and (identical? old-id new-id) ;; fast-path; really necessary?
-                     (= old-id new-id))
-          (set! (.-id root-node) new-id)))
+                       (= old-id new-id))
+          (compile-set-attribute root-node "id" new-id)))
       (let [old-name (get old-data :name)
             new-name (get new-data :name)]
         (when-not (and (identical? old-name new-name) ;; fast-path; really necessary?
-                     (= old-name new-name))
+                       (= old-name new-name))
+          (compile-set-text name-node new-name)
           (set! (.-textContent name-node) new-name)))
       (let [old-address (get old-data :address)
             new-address (get new-data :address)]
@@ -32,13 +33,25 @@
           (let [old-street (get old-address :street)
                 new-street (get new-address :street)]
             (when-not (and (identical? old-street new-street) ;; fast-path; really necessary?
-                         (= old-street new-street))
-              (set! (.-textContent street-node) new-street)))
+                           (= old-street new-street))
+              (compile-set-text street-node new-street)))
           (let [old-city (get old-address :city)
                 new-city (get new-address :city)]
             (when-not (and (identical? old-city new-city) ;; fast-path; really necessary?
-                         (= old-city new-city))
-              (set! (.-textContent city-node) new-city))))))))
+                           (= old-city new-city))
+              (compile-set-text city-node new-city))))))))
+
+;; (defn update-tree2 [nodes old-data new-data]
+;;   (compile-diff [nodes]
+;;                 [{:path [:id]
+;;                   :data (update-attribute :root :id)}
+;;                  {:path [:name]
+;;                   :data (update-text :name)}
+;;                  {:path [:address :street]
+;;                   :data (update-text :street)}
+;;                  {:path [:address :city]
+;;                   :data (update-text :city)}]))
+
 
 ;; [:div {:id id}
 ;;  [:span name]
@@ -58,8 +71,8 @@
                :name name-text
                :street street-text
                :city city-text}]
-    (set! (.-id root) (str (:id data)))
-    (set! (.-class address) "address")
+    (compile-set-attribute root "id" (:id data))
+    (compile-set-attribute root "class" "address")
     (.appendChild root name)
     (.appendChild name name-text)
     (.appendChild root address)
@@ -69,24 +82,6 @@
     (.appendChild city city-text)
     {:nodes nodes
      :update-fn (update-fn nodes)}))
-
-;; ;; TODO generic set attribute
-;; (defn- update-attribute [key node-key]
-;;   (fn [context]
-;;     (condp = key
-;;       :id (fn [(:keys [nodes])]
-;;             (fn [old new]
-;;               `(set! (.-id (get nodes :root))))))))
-
-;; (defn update-tree2 [nodes old-data new-data]
-;;   (compile-diff [nodes]
-;;                 [{:path [:id]
-;;                   :data (fn [context]
-;;                           (fn [old new]
-;;                             (set! (.-id (get nodes :root)) ???)))}
-;;                  {:path [:name]
-;;                   :data (fn [old new]
-;;                           )}]))
 
 (let [nodes (create-tree {:id 42 :name "John Doe", :address {:street "Main St", :city "Paris"}})
       root (-> nodes :nodes :root)
